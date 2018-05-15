@@ -40,39 +40,22 @@
 
    Ajouter dans Arduino\hardware\arduino\avr\boards.txt:
 
-## Arduino Pro or Pro Mini (BOD 1.8V, internal 1MHz, 4800baud) w/ ATmega328
-## --------------------------------------------------
-pro.menu.cpu.RC1MHZatmega328=Optiboot internalRC 1MHz BOD1.8V 4800baud
+  ## Arduino Pro or Pro Mini (BOD 1.8V, internal 1MHz, 4800baud) w/ ATmega328
+  ## --------------------------------------------------
+  pro.menu.cpu.RC1MHZatmega328=Optiboot internalRC 1MHz BOD1.8V 4800baud
 
-pro.menu.cpu.RC1MHZatmega328.upload.maximum_size=32256
-pro.menu.cpu.RC1MHZatmega328.upload.maximum_data_size=2048
+  pro.menu.cpu.RC1MHZatmega328.upload.maximum_size=32256
+  pro.menu.cpu.RC1MHZatmega328.upload.maximum_data_size=2048
 
-pro.menu.cpu.RC1MHZatmega328.upload.speed=4800
+  pro.menu.cpu.RC1MHZatmega328.upload.speed=4800
 
-pro.menu.cpu.RC1MHZatmega328.bootloader.low_fuses=0x62
-pro.menu.cpu.RC1MHZatmega328.bootloader.high_fuses=0xde
-pro.menu.cpu.RC1MHZatmega328.bootloader.extended_fuses=0xfe
-pro.menu.cpu.RC1MHZatmega328.bootloader.file=optiboot/optiboot_atmega328_pro_1MHz_4800.hex
+  pro.menu.cpu.RC1MHZatmega328.bootloader.low_fuses=0x62
+  pro.menu.cpu.RC1MHZatmega328.bootloader.high_fuses=0xde
+  pro.menu.cpu.RC1MHZatmega328.bootloader.extended_fuses=0xfe
+  pro.menu.cpu.RC1MHZatmega328.bootloader.file=optiboot/optiboot_atmega328_pro_1MHz_4800.hex
 
-pro.menu.cpu.RC1MHZatmega328.build.mcu=atmega328p
-pro.menu.cpu.RC1MHZatmega328.build.f_cpu=1000000L
-
-## Arduino Pro or Pro Mini (BOD 1.8V, 1MHz, 4800baud) w/ ATmega328
-## --------------------------------------------------
-pro.menu.cpu.1MHZatmega328=Optiboot external 1MHz BOD1.8V 4800baud
-
-pro.menu.cpu.1MHZatmega328.upload.maximum_size=32256
-pro.menu.cpu.1MHZatmega328.upload.maximum_data_size=2048
-
-pro.menu.cpu.1MHZatmega328.upload.speed=4800
-
-pro.menu.cpu.1MHZatmega328.bootloader.low_fuses=0x46
-pro.menu.cpu.1MHZatmega328.bootloader.high_fuses=0xde
-pro.menu.cpu.1MHZatmega328.bootloader.extended_fuses=0xfe
-pro.menu.cpu.1MHZatmega328.bootloader.file=optiboot/optiboot_atmega328_pro_1MHz_4800.hex
-
-pro.menu.cpu.1MHZatmega328.build.mcu=atmega328p
-pro.menu.cpu.1MHZatmega328.build.f_cpu=1000000L
+  pro.menu.cpu.RC1MHZatmega328.build.mcu=atmega328p
+  pro.menu.cpu.RC1MHZatmega328.build.f_cpu=1000000L
 
   Pour le contenu des bootloaders :
 
@@ -174,7 +157,7 @@ void setup()
 void presentation()
 {
   // Send the sketch name and sketch version information to the gateway and Controller
-  sendSketchInfo("Temperature", "1.0");
+  sendSketchInfo("Temperature", "1.1");
 
   //present sensor to controller
   present(CHILD_ID_TEMP, S_TEMP);
@@ -198,26 +181,27 @@ void loop()
 
   // Measure battery voltage with adc
   int sensorValue = analogRead(BATTERY_SENSE_PIN);
-  
+
   // 1M, 470K divider across battery and using internal ADC ref of 1.1V
   // Sense point is bypassed with 0.1 uF cap to reduce noise at that point
   // ((1e6+470e3)/470e3)*1.1 = Vmax = 3.44 Volts
   // 3.44/1023 = Volts per bit = 0.003363075
+  // real resistor values:
+  // ((992e3+464e3)/464e3)*1.1 = Vmax = 3.45 Volts
+  // 3.45/1023 = Volts per bit = 0.003374119
 
   int batteryPcnt = sensorValue / 10;
 
-  float batteryV  = sensorValue * 0.003363075;
-  
-//  if (oldtemperature != temperature) {
-//    oldtemperature = temperature;
+  float batteryV  = sensorValue * 0.003374119;
+
+  if (oldtemperature != temperature) {
+    oldtemperature = temperature;
     send(msgTemp.set(temperature, 1));
-    sleep(1); // Wait for 100uF capacitor to charge
-//  }
+  }
 
   if (oldbatteryV != batteryV) {
     oldbatteryV = batteryV;
     send(msgBatt.set(batteryV, 3));
-    sleep(1); // Wait for 100uF capacitor to charge
   }
 
   if (oldBatteryPcnt != batteryPcnt) {
